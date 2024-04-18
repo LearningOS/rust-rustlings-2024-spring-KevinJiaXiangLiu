@@ -4,6 +4,7 @@
 */
 // I AM NOT DONE
 
+use std::arch::x86_64::_MM_FROUND_NO_EXC;
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
@@ -72,8 +73,32 @@ impl<T> LinkedList<T> {
             },
         }
     }
+
+    pub fn get_mut(&mut self, index: i32) -> Option<&mut Node<T>> {
+        self.get_ith_node_mut(self.start, index)
+    }
+
+    fn get_ith_node_mut(&mut self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&mut Node<T>> {
+        match node {
+            None => None,
+            Some(next_ptr) => match index {
+                0 => Some(unsafe { &mut (*next_ptr.as_ptr()) }),
+                _ => self.get_ith_node_mut(unsafe { (*next_ptr.as_ptr()).next }, index - 1),
+            },
+        }
+    }
+
 	pub fn reverse(&mut self){
-		// TODO
+        let mut node = &mut self.start;
+        unsafe { std::mem::swap(&mut node.unwrap().as_mut().next, &mut node.unwrap().as_mut().prev); };
+        while let Some(current_node) = unsafe {&mut node.unwrap().as_mut().prev} {
+            // let mut next_node = unsafe { &mut current_node.as_mut().next };
+            unsafe { std::mem::swap(&mut current_node.as_mut().next, &mut current_node.as_mut().prev); };
+            let mut node = unsafe{ &mut current_node.as_mut().prev };
+            println!("Swap");
+        }
+
+        std::mem::swap(&mut self.start, &mut self.end);
 	}
 }
 

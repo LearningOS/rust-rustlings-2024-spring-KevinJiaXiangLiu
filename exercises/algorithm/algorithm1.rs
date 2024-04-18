@@ -56,11 +56,11 @@ impl<T> LinkedList<T> {
         self.length += 1;
     }
 
-    pub fn get(&mut self, index: i32) -> Option<&T> {
+    pub fn get(&self, index: i32) -> Option<&T> {
         self.get_ith_node(self.start, index)
     }
 
-    fn get_ith_node(&mut self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&T> {
+    fn get_ith_node(&self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&T> {
         match node {
             None => None,
             Some(next_ptr) => match index {
@@ -69,14 +69,50 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
+	pub fn merge(list_a:LinkedList<T>, list_b:LinkedList<T>) -> Self 
+    where T: std::cmp::PartialOrd + Clone
+	{   
+        let mut result = Self {
             length: 0,
             start: None,
             end: None,
+        };
+        // 两个空链表
+        if list_a.length == 0 && list_b.length == 0 {
+            return result;
         }
+
+        let mut a_idx = 0;
+        let mut b_idx = 0;
+        loop {
+            let a_current_node = list_a.get(a_idx).unwrap();
+            let b_current_node = list_b.get(b_idx).unwrap();
+            let next_node = if a_current_node <= b_current_node {
+                a_idx += 1;
+                a_current_node
+            } else {
+                b_idx += 1;
+                b_current_node
+            };
+            result.add(next_node.clone());
+            // 判断退出
+            if a_idx == list_a.length.try_into().unwrap() {
+                for i in b_idx..list_b.length.try_into().unwrap() {
+                    let b_node = list_b.get(i).unwrap();
+                    result.add(b_node.clone());
+                }
+                break;
+            }
+
+            if b_idx == list_b.length.try_into().unwrap() {
+                for i in a_idx..list_a.length.try_into().unwrap() {
+                    let a_node = list_a.get(i).unwrap();
+                    result.add(a_node.clone());
+                }
+                break;
+            }
+        }
+        result
 	}
 }
 
