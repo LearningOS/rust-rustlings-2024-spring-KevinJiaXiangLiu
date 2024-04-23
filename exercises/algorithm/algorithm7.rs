@@ -102,7 +102,17 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 fn bracket_match(bracket: &str) -> bool
 {
 	//TODO
-	true
+	let mut stack = Stack::new();
+	for c in bracket.chars() {
+		match c {
+			'(' | '[' | '{' => { stack.push(c); },
+			')' if let Some(')') = stack.peek() => { stack.pop(); },
+			']' if let Some(']') = stack.peek() => { stack.pop(); },
+			'}' if let Some('}') = stack.peek() => { stack.pop(); },
+			_ => {},
+		};
+	}
+	stack.is_empty()
 }
 
 #[cfg(test)]
